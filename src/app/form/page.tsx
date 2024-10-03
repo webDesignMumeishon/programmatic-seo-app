@@ -1,12 +1,22 @@
-import SEOForm from '@/components/seo-form'
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+
+import SEOForm from '@/components/seo-form'
+import { verifySession } from '@/lib/dal'
+
 
 export const metadata: Metadata = {
     title: 'User Information',
     description: 'Enter your user information',
 }
 
-export default function FormPage() {
+export default async function FormPage() {
+    const { isAuth } = await verifySession()
+
+    if (!isAuth) {
+        redirect('/login')
+    }
+
     return (
         <div className="flex h-screen w-screen flex-col items-center justify-center">
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

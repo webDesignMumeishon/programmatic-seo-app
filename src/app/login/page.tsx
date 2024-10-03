@@ -1,12 +1,20 @@
 import LoginForm from '@/components/login-form'
+import { verifySession } from '@/lib/dal'
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
     title: 'Login',
     description: 'Login to your account',
 }
 
-export default function LoginPage() {
+export default async function LoginPage() {
+    const { isAuth } = await verifySession()
+
+    if (isAuth) {
+        redirect('/form')
+    }
+
     return (
         <div className="flex h-screen w-screen flex-col items-center justify-center">
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
