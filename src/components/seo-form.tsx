@@ -15,14 +15,6 @@ export default function SEOForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [cities, setCities] = useState<string[]>(['miami'])
     const [services, setServices] = useState<string[]>(['roofing'])
-
-
-
-    const removeService = (service: string) => {
-        const filtered = services.filter(s => s !== service)
-        setServices(filtered)
-    }
-
     const [data, setData] = useState(initialState)
 
     const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
@@ -65,6 +57,11 @@ export default function SEOForm() {
             city: data.city,
             service: ''
         })
+    }
+
+    const removeService = (service: string) => {
+        const filtered = services.filter(s => s !== service)
+        setServices(filtered)
     }
 
     async function onSubmit(event: React.SyntheticEvent) {
@@ -123,35 +120,43 @@ export default function SEOForm() {
                 <div className='flex gap-6'>
                     <div className="space-y-2 flex-1">
                         <Label htmlFor="city">City</Label>
-                        <Input
-                            name="city"
-                            id="city"
-                            placeholder="Enter your city"
-                            disabled={isLoading}
-                            value={data.city}
-                            onChange={handleOnChange}
-                            onKeyDown={(e) => e.key === 'Enter' && addCity()}
-                        />
+                        <div className='flex gap-1'>
+                            <Input
+                                name="city"
+                                id="city"
+                                placeholder="Enter your city"
+                                disabled={isLoading}
+                                value={data.city}
+                                onChange={handleOnChange}
+                                onKeyDown={(e) => e.key === 'Enter' && addCity()}
+                            />
+                            <Button>+</Button>
+                        </div>
+
                         <div className='flex gap-2 flex-wrap'>
                             {
-                                cities.map(city => <p onClick={() => removeCity(city)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{city}</p>)
+                                cities.map((city, id) => <p key={id} onClick={() => removeCity(city)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{city}</p>)
                             }
                         </div>
                     </div>
                     <div className="space-y-2 w-[50%]">
                         <Label htmlFor="service">Service</Label>
-                        <Input
-                            name="service" id="service"
-                            placeholder="Enter your service"
-                            disabled={isLoading}
-                            value={data.service}
-                            onChange={handleOnChange}
-                            onKeyDown={(e) => e.key === 'Enter' && addService()}
-                        />
+                        <div className='flex gap-1'>
+                            <Input
+                                name="service" id="service"
+                                placeholder="Enter your service"
+                                disabled={isLoading}
+                                value={data.service}
+                                onChange={handleOnChange}
+                                onKeyDown={(e) => e.key === 'Enter' && addService()}
+                            />
+                            <Button>+</Button>
+                        </div>
+
                         <div className='flex gap-2 flex-wrap'>
 
                             {
-                                services.map(service => <p onClick={() => removeService(service)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{service}</p>)
+                                services.map((service, id) => <p key={id} onClick={() => removeService(service)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{service}</p>)
                             }
                         </div>
                     </div>
