@@ -6,12 +6,88 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { logout } from '@/actions/auth'
 
+const initialState = {
+    city: '',
+    service: ''
+}
+
 export default function SEOForm() {
     const [isLoading, setIsLoading] = useState(false)
+    const [cities, setCities] = useState<string[]>(['miami'])
+    const [services, setServices] = useState<string[]>(['roofing'])
+
+
+
+    const removeService = (service: string) => {
+        const filtered = services.filter(s => s !== service)
+        setServices(filtered)
+    }
+
+    const [data, setData] = useState(initialState)
+
+    const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
+        const name = event.currentTarget.name
+        const value = event.currentTarget.value
+        setData(prev => {
+            return {
+                ...prev,
+                [name]: value
+            }
+        })
+    }
+
+    const addCity = () => {
+        if (data.city.length > 0) {
+            setCities(prevCities => ([
+                ...prevCities,
+                data.city
+            ]))
+        }
+        setData({
+            service: data.service,
+            city: ''
+        })
+    }
+
+    const removeCity = (city: string) => {
+        const filtered = cities.filter(c => c !== city)
+        setCities(filtered)
+    }
+
+    const addService = () => {
+        if (data.service.length > 0) {
+            setServices(prevServices => ([
+                ...prevServices,
+                data.service
+            ]))
+        }
+        setData({
+            city: data.city,
+            service: ''
+        })
+    }
 
     async function onSubmit(event: React.SyntheticEvent) {
         event.preventDefault()
-        setIsLoading(true)
+
+        if (data.city.length > 0) {
+            setCities(prevCities => ([
+                ...prevCities,
+                data.city
+            ]))
+        }
+
+        if (data.service.length > 0) {
+            setServices(prevServices => ([
+                ...prevServices,
+                data.service
+            ]))
+        }
+
+
+        setData(initialState)
+
+        // setIsLoading(true)
 
         const target = event.target as typeof event.target & {
             city: { value: string }
@@ -20,41 +96,76 @@ export default function SEOForm() {
             companyName: { value: string }
         }
 
-        const formData = {
-            city: target.city.value,
-            service: target.service.value,
-            website: target.website.value,
-            companyName: target.companyName.value,
-        }
+        console.log(event.target)
 
-        // Here you would typically send the form data to your server
-        console.log(formData)
+        // const formData = {
+        //     city: target.city.value,
+        //     service: target.service.value,
+        //     website: target.website.value,
+        //     companyName: target.companyName.value,
+        // }
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // // Here you would typically send the form data to your server
+        // console.log(formData)
 
-        setIsLoading(false)
-        // Here you might want to redirect the user or show a success message
+        // // Simulate API call
+        // await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // setIsLoading(false)
+        // // Here you might want to redirect the user or show a success message
     }
 
     return (
         <div>
             <form onSubmit={onSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" placeholder="Enter your city" disabled={isLoading} required />
+                <h2>Keywords</h2>
+
+                <div className='flex gap-6'>
+                    <div className="space-y-2 flex-1">
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                            name="city"
+                            id="city"
+                            placeholder="Enter your city"
+                            disabled={isLoading}
+                            value={data.city}
+                            onChange={handleOnChange}
+                            onKeyDown={(e) => e.key === 'Enter' && addCity()}
+                        />
+                        <div className='flex gap-2 flex-wrap'>
+                            {
+                                cities.map(city => <p onClick={() => removeCity(city)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{city}</p>)
+                            }
+                        </div>
+                    </div>
+                    <div className="space-y-2 w-[50%]">
+                        <Label htmlFor="service">Service</Label>
+                        <Input
+                            name="service" id="service"
+                            placeholder="Enter your service"
+                            disabled={isLoading}
+                            value={data.service}
+                            onChange={handleOnChange}
+                            onKeyDown={(e) => e.key === 'Enter' && addService()}
+                        />
+                        <div className='flex gap-2 flex-wrap'>
+
+                            {
+                                services.map(service => <p onClick={() => removeService(service)} className='border-dashed border-2 border-black p-1 cursor-pointer'>{service}</p>)
+                            }
+                        </div>
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="service">Service</Label>
-                    <Input id="service" placeholder="Enter your service" disabled={isLoading} required />
-                </div>
+
+                <h2>Company information</h2>
+
                 <div className="space-y-2">
                     <Label htmlFor="website">Website</Label>
-                    <Input id="website" placeholder="Enter your website" type="url" disabled={isLoading} required />
+                    <Input id="website" placeholder="Enter your website" type="url" disabled={isLoading} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
-                    <Input id="companyName" placeholder="Enter your company name" disabled={isLoading} required />
+                    <Input id="companyName" placeholder="Enter your company name" disabled={isLoading} />
                 </div>
                 <Button className="w-full" type="submit" disabled={isLoading}>
                     {isLoading && (
@@ -65,8 +176,8 @@ export default function SEOForm() {
                     )}
                     Submit
                 </Button>
-
             </form>
+
             <Button className="w-full bg-red-600 mt-4 hover:bg-red-400" type="submit" disabled={isLoading} onClick={() => logout()}>
                 {isLoading && (
                     <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
