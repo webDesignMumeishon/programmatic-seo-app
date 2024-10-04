@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { logout } from '@/actions/auth'
+import { create } from '@/actions/content'
 
 const initialState = {
     city: '',
@@ -67,22 +68,7 @@ export default function SEOForm() {
     async function onSubmit(event: React.SyntheticEvent) {
         event.preventDefault()
 
-        if (data.city.length > 0) {
-            setCities(prevCities => ([
-                ...prevCities,
-                data.city
-            ]))
-        }
-
-        if (data.service.length > 0) {
-            setServices(prevServices => ([
-                ...prevServices,
-                data.service
-            ]))
-        }
-
-
-        setData(initialState)
+        // setData(initialState)
 
         // setIsLoading(true)
 
@@ -106,7 +92,8 @@ export default function SEOForm() {
         // console.log(formData)
 
         // // Simulate API call
-        // await new Promise(resolve => setTimeout(resolve, 1000))
+        await create(cities, services[0])
+        
 
         // setIsLoading(false)
         // // Here you might want to redirect the user or show a success message
