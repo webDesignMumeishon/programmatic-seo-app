@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label"
 import { logout } from '@/actions/auth'
 import { create } from '@/actions/content'
 import KeywordInput from './atoms/KeywordInput'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { CircleHelp } from 'lucide-react';
 
 const initialState = {
     city: '',
@@ -88,8 +95,20 @@ export default function SEOForm() {
             <h2>Keywords</h2>
 
             <div className='flex gap-6'>
-                <div className="space-y-2 flex-1">
-                    <Label htmlFor="city">City</Label>
+                <div className="space-y-2 flex-1 items-center">
+                    <div className='flex gap-2'>
+                        <Label htmlFor="city">City</Label>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <CircleHelp size={'16'} className='cursor-pointer'/>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Press enter to add</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                     <div className='flex gap-1'>
                         <Input
                             name="city"
@@ -109,7 +128,19 @@ export default function SEOForm() {
                     </div>
                 </div>
                 <div className="space-y-2 w-[50%]">
-                    <Label htmlFor="service">Service</Label>
+                    <div className='flex gap-2'>
+                        <Label htmlFor="service">Service</Label>
+                        <TooltipProvider >
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <CircleHelp size={'16'} className='cursor-pointer'/>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Press enter to add</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                     <div className='flex gap-1'>
                         <Input
                             name="service"
