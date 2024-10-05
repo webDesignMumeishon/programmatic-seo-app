@@ -125,7 +125,7 @@ export default function SEOForm() {
                     <div className='flex gap-2 flex-wrap'>
 
                         {
-                            cities.map((service) => <KeywordInput keyword={service} remove={removeService} />)
+                            services.map((service) => <KeywordInput keyword={service} remove={removeService} />)
                         }
                     </div>
                 </div>
