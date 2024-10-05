@@ -1,10 +1,8 @@
 import openai from '@/lib/openai';
 import axios from 'axios'
-import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid';
 import puppeteer from 'puppeteer'
 import { htmlToText } from 'html-to-text';
-import { cookies } from 'next/headers';
 import oauth2Client from '@/lib/oauth';
 import { google } from 'googleapis';
 import { getServerSession } from 'next-auth/next';
@@ -319,7 +317,7 @@ class Content {
                             const generatedData = await this.openAi(scrapping, industry, city)
                             return await this.createGoogleDoc(`${uuidv4()}-${city}-${keyword}`, generatedData?.choices[0]?.message?.content as string)
                         }
-                        
+
                     }
 
                 }

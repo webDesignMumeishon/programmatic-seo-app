@@ -67,42 +67,20 @@ export default function SEOForm() {
 
     async function onSubmit(event: React.SyntheticEvent) {
         event.preventDefault()
-
-        // setData(initialState)
-
-        // setIsLoading(true)
-
-        const target = event.target as typeof event.target & {
-            city: { value: string }
-            service: { value: string }
-            website: { value: string }
-            companyName: { value: string }
-        }
-
-        console.log(event.target)
-
-        // const formData = {
-        //     city: target.city.value,
-        //     service: target.service.value,
-        //     website: target.website.value,
-        //     companyName: target.companyName.value,
-        // }
-
-        // // Here you would typically send the form data to your server
-        // console.log(formData)
-
-        // // Simulate API call
         setIsLoading(true)
         await create(cities, services[0])
         setIsLoading(false)
-
-        // setIsLoading(false)
-        // // Here you might want to redirect the user or show a success message
     }
 
-    if(isLoading){
+    if (isLoading) {
         return <h1>Loading</h1>
     }
+
+    const handleKeyDown = (event: any) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission on Enter
+        }
+    };
 
     return (
         <div>
@@ -122,7 +100,7 @@ export default function SEOForm() {
                                 onChange={handleOnChange}
                                 onKeyDown={(e) => e.key === 'Enter' && addCity()}
                             />
-                            <Button>+</Button>
+                            <Button type='button' onClick={() => addCity()}>+</Button>
                         </div>
 
                         <div className='flex gap-2 flex-wrap'>
@@ -164,7 +142,7 @@ export default function SEOForm() {
                     <Label htmlFor="companyName">Company Name</Label>
                     <Input id="companyName" placeholder="Enter your company name" disabled={isLoading} />
                 </div>
-                <Button className="w-full" type="submit" disabled={isLoading}>
+                <Button className="w-full" type="submit" disabled={isLoading} onKeyDown={handleKeyDown}>
                     {isLoading && (
                         <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
