@@ -14,8 +14,8 @@ const initialState = {
 
 export default function SEOForm() {
     const [isLoading, setIsLoading] = useState(false)
-    const [cities, setCities] = useState<string[]>(['miami'])
-    const [services, setServices] = useState<string[]>(['roofing'])
+    const [cities, setCities] = useState<string[]>(['Seattle'])
+    const [services, setServices] = useState<string[]>(['Traffic Ticket Lawyer'])
     const [data, setData] = useState(initialState)
 
     const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
@@ -92,11 +92,16 @@ export default function SEOForm() {
         // console.log(formData)
 
         // // Simulate API call
+        setIsLoading(true)
         await create(cities, services[0])
-        
+        setIsLoading(false)
 
         // setIsLoading(false)
         // // Here you might want to redirect the user or show a success message
+    }
+
+    if(isLoading){
+        return <h1>Loading</h1>
     }
 
     return (

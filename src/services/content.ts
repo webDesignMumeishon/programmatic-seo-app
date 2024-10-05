@@ -4,6 +4,11 @@ import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid';
 import puppeteer from 'puppeteer'
 import { htmlToText } from 'html-to-text';
+import { cookies } from 'next/headers';
+import oauth2Client from '@/lib/oauth';
+import { google } from 'googleapis';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 const websiteInformation = `https://www.ticketcutter.com/ The firm’s name is: Ticket Cutter Our phone number is: 4252642000`
 
@@ -249,26 +254,78 @@ class Content {
         return completion
     }
 
+    async createGoogleDoc(title: string, content: string) {
+        const session: any = await getServerSession(authOptions);
+
+        // Access the refresh token from the session
+
+        oauth2Client.setCredentials({
+            access_token: session.accessToken,
+            refresh_token: session?.refreshToken
+        });
+
+        // Initialize the Docs API
+        const docs = google.docs({ version: 'v1', auth: oauth2Client });
+
+        try {
+            // Create a new Google Doc
+            const response = await docs.documents.create({
+                requestBody: {
+                    title,
+                },
+            });
+
+            // The document ID
+            const documentId = response.data.documentId;
+            console.log('Document created with ID:', documentId);
+
+            // Optionally: You can insert text into the document
+            await docs.documents.batchUpdate({
+                documentId: documentId || '',
+                requestBody: {
+                    requests: [
+                        {
+                            insertText: {
+                                location: {
+                                    index: 1, // Starting at index 1
+                                },
+                                text: content,
+                            },
+                        },
+                    ],
+                },
+            });
+
+            console.log('Text inserted into document!');
+        } catch (error) {
+            console.error('Error creating document:', error);
+        }
+    }
+
 
     async create(cities: string[], industry: string) {
-        cities.map(async (city: string) => {
+        await Promise.all(
+            cities.map(async (city: string) => {
 
-            const keyword = `${industry} ${city}`;
 
-            const results = await axios.get(this.buildUrlFromCity(keyword))
+                const keyword = `${industry} ${city}`;
 
-            for (const result of results.data.organic_results) {
-                if (this.isUrlDirectory(result.link)) {
-                    const scrapping = await this.getBodyContent(result.link);
-                    if (scrapping !== null) {
-                        const generatedData = await this.openAi(scrapping, industry, city)
-                        fs.promises.writeFile(`${uuidv4()}-${city}-${keyword}.md`, generatedData?.choices[0]?.message?.content as string)
+                const results = await axios.get(this.buildUrlFromCity(keyword))
+
+                for (const result of results.data.organic_results) {
+                    if (this.isUrlDirectory(result.link)) {
+                        const scrapping = await this.getBodyContent(result.link);
+                        if (scrapping !== null) {
+                            const generatedData = await this.openAi(scrapping, industry, city)
+                            return await this.createGoogleDoc(`${uuidv4()}-${city}-${keyword}`, generatedData?.choices[0]?.message?.content as string)
+                        }
+                        
                     }
-                    return
-                }
 
-            }
-        })
+                }
+            })
+        )
+
     }
 }
 
