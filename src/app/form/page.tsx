@@ -11,10 +11,14 @@ export const metadata: Metadata = {
 }
 
 export default async function FormPage() {
-    const { isAuth } = await verifySession()
+    const { isAuth, hasToken } = await verifySession()
 
     if (!isAuth) {
         redirect('/login')
+    }
+
+    if (!hasToken) {
+        redirect('/google')
     }
 
     return (
