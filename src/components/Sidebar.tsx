@@ -28,7 +28,7 @@ const Sidebar = () => {
                 </div>
                 <nav className="flex-1 px-2 py-4 space-y-2">
                     <SidebarButton page={"Generate"} pathname={'/form'} currentPath={currentPath} />
-                    <SidebarButton page={"Settings"} pathname={'settings'} currentPath={currentPath} />
+                    <SidebarButton page={"Settings"} pathname={'/settings'} currentPath={currentPath} />
                 </nav>
                 <div className="p-4">
                     <Button
