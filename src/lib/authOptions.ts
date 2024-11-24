@@ -4,6 +4,7 @@ import GoogleProvider from 'next-auth/providers/google';
 console.log('=======> NEXTAUTH_SECRET', process.env.NEXTAUTH_SECRET)
 
 export const authOptions: AuthOptions = {
+    debug: true,
     secret: process.env.NEXTAUTH_SECRET,
     providers: [
         GoogleProvider({
