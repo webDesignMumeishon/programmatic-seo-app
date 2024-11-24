@@ -6,10 +6,10 @@ import { cache } from 'react'
 
 export const verifySession = cache(async () => {
     const cookie = cookies().get('session')?.value
-    const cookieGoogle = cookies().get('next-auth.session-token')?.value
+    const cookieGoogle = cookies().get('next-auth.session-token')?.value || cookies().get('__Secure-next-auth.session-token')?.value
 
     const session = await decrypt(cookie)
-    
+
     console.log({
         session,
         cookie,
