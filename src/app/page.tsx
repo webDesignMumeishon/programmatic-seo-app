@@ -9,7 +9,7 @@ export default function LandingPage() {
           Welcome to Programmatic SEO App
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Boost your website's visibility with our powerful SEO automation tools.
+          Boost your website&apos;s visibility with our powerful SEO automation tools.
         </p>
         <Link href="/login" passHref>
           <Button size="lg" className="font-semibold">

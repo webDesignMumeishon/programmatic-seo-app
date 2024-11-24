@@ -3,20 +3,14 @@ import React from 'react'
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { logout } from '@/actions/auth'
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react"
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import SidebarButton from './atoms/SidebarButton'
 
 const Sidebar = () => {
     const currentPath = usePathname()
-    const [isLoading, setIsLoading] = useState(false)
-    const [cities, setCities] = useState<string[]>(['Seattle'])
-    const [services, setServices] = useState<string[]>(['Traffic Ticket Lawyer'])
     const [activeTab, setActiveTab] = useState('dashboard')
 
     return (
@@ -35,7 +29,6 @@ const Sidebar = () => {
                         variant="destructive"
                         className="w-full"
                         onClick={() => logout()}
-                        disabled={isLoading}
                     >
                         Log Out
                     </Button>
@@ -75,7 +68,6 @@ const Sidebar = () => {
                                 variant="destructive"
                                 className="w-full"
                                 onClick={() => logout()}
-                                disabled={isLoading}
                             >
                                 Log Out
                             </Button>

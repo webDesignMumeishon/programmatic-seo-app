@@ -6,9 +6,19 @@ import { htmlToText } from 'html-to-text';
 import oauth2Client from '@/lib/oauth';
 import { google } from 'googleapis';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 
-const websiteInformation = `https://www.ticketcutter.com/ The firm’s name is: Ticket Cutter Our phone number is: 4252642000`
+const getPrompt = (keyword: string, city: string) => {
+    return `
+    Please respond only in the English language. You write using no filler or fluff words. 
+    You are an expert copywriter landing page creator with decades of experience writing service pages.  
+    You have a Persuasive writing style. 
+    Do not self reference. 
+    Do not explain what you are doing. 
+    Make sure you are writing this service page for the following city: ${city}.
+    Please include the following keywords: ${keyword}. 
+    `
+}
 
 const avoidedWords = [
     "Actually", "Basically", "Simply", "Really", "Quite", "Generally", "Usually", "Virtually",
@@ -27,46 +37,6 @@ const avoidedWords = [
     "Incontrovertibly", "Irrefutably", "Manifestly", "Obviously", "Plainly", "Unmistakably",
     "Patently", "Essential", "Understanding", "Unlock", "Unlocking", "Key", "Navigate", "Navigating"
 ];
-
-const structure = `Title of the Page
-Meta Description
-
-Service Page Title:
-
-(KEYWORD) Lawyer in (CITY)
-Include accurate facts about the (CITY) in the paragraph and relate it to the (KEYWORD).
-
-[Service Name] Lawyer in [City, State]
-Being involved in a [related situation] can be devastating. A [specific incident] can change your life in the blink of an eye, so having the right support is very important. Besides the emotional trauma, you also have to tend to your physical injuries and property damage.
-Legal Consequences of (KEYWORD) in Washington State
-
-(KEYWORD) Penalties in (CITY):
-
-List legal options to handle (KEYWORD).
-
-How Our Firm Can Help You 
-At Ticket Cutter, we handle [case types], [specific claims], and [related legal matters]. Joseph B. Cutter is a seasoned [City] [specialty] attorney and [related field] law specialist who can help you through the filing and claims process. Our main goal is to help you get the compensation you deserve and cover all losses due to the [incident].
-
-By choosing our [service], you can focus on making a fast recovery and putting your life back together. [Related incidents] can lead to excessive medical bills, wrongful death, traumatic brain injuries, and other serious injuries. Our experienced attorneys ensure your insurance claims get you maximum compensation.
-
-Why Choose Ticket Cutter | (CITY) (KEYWORD) Attorney:
-
-With over [number] years of experience, our firm has a proven track record of success. We are known for our dedication, expertise, and personalized approach. Read testimonials from our satisfied clients to learn more about our impact.
-
-Ticket Cutter's Local Expertise:
-
-We serve various areas including, but not limited to: Seattle, Renton, Everett, Federal Way, Gig Harbor, Kent, Kirkland, Olympia, Redmond, Tacoma, Bellevue, Bremerton, Tukwila, Kent, Auburn, Burien, Sammamish, Issaquah and Bothell 
-
-How to handle (KEYWORD) in (CITY)
-Don’t wait to seek the justice you deserve. Contact us today for a free consultation and take the first step toward recovery. Call us at [phone number] or fill out our online contact form.
-
-(KEYWORD) in (CITY) FAQs
-Write out the frequently asked questions related to the (KEYWORD)
-
-Things to not do when writing this content: 
-
-Don't not start any sentence on this service page with: At Ticket Cutter 
-`
 
 const popularDirectories = [
     'yelp',
@@ -202,7 +172,6 @@ class Content {
 
         // Get the body content
         const bodyContent = await page.evaluate(() => {
-            // @ts-ignore
             const body = document.querySelector('body');
             return body ? body.innerHTML : null;  // Return the innerHTML if body exists, else return null
         });
@@ -231,20 +200,17 @@ class Content {
         return !popularDirectories.some(directory => url.includes(directory))
     }
 
-    async openAi(scrapedText: string, keyword: string, city: string) {
+    async openAi(scrapedText: string, keyword: string, city: string, websiteUrl: string, companyName: string) {
         const completion = await openai.chat.completions.create({
             messages: [
-                { "role": "system", "content": "You are a copywriter with decades of experience writing service pages for specific cities that our law firm. You write using no filler or fluff words. You write clearly and in complete sentences." },
-                { "role": "system", "content": `Make sure to use the keyword: ${keyword} and city: ${city}` },
-                { "role": "system", "content": `Here is the information about my website/company you need to write for: ${websiteInformation}` },
+                { "role": "system", "content": getPrompt(keyword, city) },
+                { "role": "system", "content": `Here is the information about my website you need to write for: ${websiteUrl}. This is the name of the company you need to write for: ${companyName}` },
                 { "role": "system", "content": "Write this in an SEO optimized fashion and include the keywords and relevant titles in the service page. Write a minimum of 1100-1300 words." },
-                { "role": "system", "content": "Write from the point of view of one attorney. Write in the most human way possible. Write in a way that will pass an AI detection test. Write in complete sentences. " },
+                { "role": "system", "content": "Write in the most human way possible. Write in a way that will pass an AI detection test. Write in complete sentences. " },
                 { "role": "system", "content": "Vary the output in each section. Don't be a cookie cutter when it comes to the writing." },
                 { "role": "system", "content": "Write it in plain text. not HTML" },
-                { "role": "system", "content": `use the following structure: ${structure}` },
                 { "role": "system", "content": `Do not use the following words: ${avoidedWords}` },
-                { "role": "system", "content": "Most importantly make sure all of the information is in compliance with Washington State law and how other lawyers in Washington would handle this legal matter." },
-                { "role": "assistant", "content": `Please use this content as the knowledge base information for the page: ${scrapedText}` },
+                { "role": "assistant", "content": `Please use this content as the knowledge base information for the page: ${scrapedText}.` },
             ],
             model: "gpt-4o-mini",
         });
@@ -301,10 +267,9 @@ class Content {
     }
 
 
-    async create(cities: string[], industry: string) {
+    async create(cities: string[], industry: string, websiteUrl: string, companyName: string) {
         await Promise.all(
             cities.map(async (city: string) => {
-
 
                 const keyword = `${industry} ${city}`;
 
@@ -314,8 +279,11 @@ class Content {
                     if (this.isUrlDirectory(result.link)) {
                         const scrapping = await this.getBodyContent(result.link);
                         if (scrapping !== null) {
-                            const generatedData = await this.openAi(scrapping, industry, city)
-                            return await this.createGoogleDoc(`${uuidv4()}-${city}-${keyword}`, generatedData?.choices[0]?.message?.content as string)
+                            const generatedData = await this.openAi(scrapping, industry, city, websiteUrl, companyName)
+                            const knowledgeBase = `Knowledge base source: ${result.link}\n\n`;
+                            const content = generatedData?.choices[0]?.message?.content as string
+                            const updatedContent = knowledgeBase + content
+                            return await this.createGoogleDoc(`${uuidv4()}-${city}-${keyword}`, updatedContent)
                         }
 
                     }

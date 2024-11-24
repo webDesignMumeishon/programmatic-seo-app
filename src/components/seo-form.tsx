@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { logout } from '@/actions/auth'
-import { create } from '@/actions/content'
+import { createJobs } from '@/actions/content'
 import KeywordInput from './atoms/KeywordInput'
 import {
     Tooltip,
@@ -22,9 +21,13 @@ const initialState = {
 
 export default function SEOForm() {
     const [isLoading, setIsLoading] = useState(false)
-    const [cities, setCities] = useState<string[]>(['Seattle'])
-    const [services, setServices] = useState<string[]>(['Traffic Ticket Lawyer'])
+    const [cities, setCities] = useState<string[]>([])
+
+    const [services, setServices] = useState<string[]>([])
     const [data, setData] = useState(initialState)
+    const [company, setCompany] = useState('')
+    const [phone, setPhone] = useState('')
+    const [website, setWebsite] = useState('')
 
     const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
         const name = event.currentTarget.name
@@ -75,8 +78,11 @@ export default function SEOForm() {
 
     async function onSubmit(event: React.SyntheticEvent) {
         event.preventDefault()
+        if (cities.length === 0 || services.length === 0 || phone.length === 0) {
+            return alert('Missing cities or services')
+        }
         setIsLoading(true)
-        await create(cities, services[0])
+        await createJobs(cities, services, website, company, phone)
         setIsLoading(false)
     }
 
@@ -89,7 +95,6 @@ export default function SEOForm() {
             event.preventDefault(); // Prevent form submission on Enter
         }
     };
-
     return (
         <div>
             <h2>Keywords</h2>
@@ -101,7 +106,7 @@ export default function SEOForm() {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <CircleHelp size={'16'} className='cursor-pointer'/>
+                                    <CircleHelp size={'16'} className='cursor-pointer' />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Press enter to add</p>
@@ -123,7 +128,7 @@ export default function SEOForm() {
 
                     <div className='flex gap-2 flex-wrap'>
                         {
-                            cities.map((city) => <KeywordInput keyword={city} remove={removeCity} />)
+                            cities.map((city) => <KeywordInput key={city} keyword={city} remove={removeCity} />)
                         }
                     </div>
                 </div>
@@ -133,7 +138,7 @@ export default function SEOForm() {
                         <TooltipProvider >
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <CircleHelp size={'16'} className='cursor-pointer'/>
+                                    <CircleHelp size={'16'} className='cursor-pointer' />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>Press enter to add</p>
@@ -156,24 +161,30 @@ export default function SEOForm() {
                     <div className='flex gap-2 flex-wrap'>
 
                         {
-                            services.map((service) => <KeywordInput keyword={service} remove={removeService} />)
+                            services.map((service) => <KeywordInput key={service} keyword={service} remove={removeService} />)
                         }
                     </div>
                 </div>
             </div>
-            <form onSubmit={onSubmit} className="space-y-4">
 
+            <form onSubmit={onSubmit} className="space-y-4">
 
                 <h2>Company information</h2>
 
                 <div className="space-y-2">
                     <Label htmlFor="website">Website</Label>
-                    <Input id="website" placeholder="Enter your website" type="url" disabled={isLoading} />
+                    <Input id="website" placeholder="Enter your website" type="url" disabled={isLoading} onChange={(e) => setWebsite(e.target.value)} value={website} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
-                    <Input id="companyName" placeholder="Enter your company name" disabled={isLoading} />
+                    <Input id="companyName" placeholder="Enter your company name" disabled={isLoading} onChange={(e) => setCompany(e.target.value)} value={company} />
                 </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input id="phone" placeholder="Enter your company phone" disabled={isLoading} onChange={(e) => setPhone(e.target.value)} value={phone} />
+                </div>
+
                 <Button className="w-full" type="submit" disabled={isLoading} onKeyDown={handleKeyDown}>
                     {isLoading && (
                         <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
