@@ -9,6 +9,12 @@ export const verifySession = cache(async () => {
     const cookieGoogle = cookies().get('next-auth.session-token')?.value
 
     const session = await decrypt(cookie)
+    
+    console.log({
+        session,
+        cookie,
+        cookieGoogle
+    })
 
     if (!session?.userId) {
         return { isAuth: false, userId: null, hasToken: false }
