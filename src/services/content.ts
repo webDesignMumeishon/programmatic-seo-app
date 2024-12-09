@@ -192,7 +192,10 @@ class Content {
     }
 
     buildUrlFromCity = (query: string) => {
-        const apiKey = '9d6104e7b1ab1d6c5fcb484b76a55f9d818c2184318d7681a432149c53ff2adc';
+        const apiKey = process.env.SERP_API_KEY
+        if (apiKey === undefined) {
+            throw new Error('Missing SERP API Key')
+        }
         return `https://serpapi.com/search?api_key=${apiKey}&q=${encodeURIComponent(query)}`;
     }
 
