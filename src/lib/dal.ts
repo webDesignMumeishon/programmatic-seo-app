@@ -10,12 +10,6 @@ export const verifySession = cache(async () => {
 
     const session = await decrypt(cookie)
 
-    console.log({
-        session,
-        cookie,
-        cookieGoogle
-    })
-
     if (!session?.userId) {
         return { isAuth: false, userId: null, hasToken: false }
     }

@@ -10,7 +10,6 @@ export async function createJobs(cities: string[], industries: string[], website
 
     for (const city of cities) {
         for (const industry of industries) {
-            console.log(`Adding job for city: ${city}, industry: ${industry}`);
             const payload = {
                 city,
                 industry,

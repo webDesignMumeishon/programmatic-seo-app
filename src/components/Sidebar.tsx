@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react"
 import { usePathname } from 'next/navigation'
 import SidebarButton from './atoms/SidebarButton'
+import { signOut } from 'next-auth/react'
 
 const Sidebar = () => {
     const currentPath = usePathname()
@@ -28,7 +29,10 @@ const Sidebar = () => {
                     <Button
                         variant="destructive"
                         className="w-full"
-                        onClick={() => logout()}
+                        onClick={async () => {
+                            await logout()
+                            await signOut()
+                        }}
                     >
                         Log Out
                     </Button>
@@ -67,7 +71,10 @@ const Sidebar = () => {
                             <Button
                                 variant="destructive"
                                 className="w-full"
-                                onClick={() => logout()}
+                                onClick={async () => {
+                                    await logout()
+                                    await signOut()
+                                }}
                             >
                                 Log Out
                             </Button>
