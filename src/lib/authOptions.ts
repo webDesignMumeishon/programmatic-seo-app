@@ -1,4 +1,5 @@
 import { AuthOptions } from 'next-auth';
+import bcrypt from 'bcrypt'
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from '../../lib/prisma';
@@ -16,22 +17,31 @@ export const authOptions: AuthOptions = {
         CredentialsProvider({
             name: "Credentials",
             credentials: {
-                email: { label: "Email", type: "text", placeholder: "jsmith@mail.com" },
-                password: { label: "Password", type: "password" }
+                email: { label: "Email", type: "text" },
+                password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials?.email }
-                })
-                if (user !== null) {
-                    return {
-                        id: String(user.id),
-                        email: user.email,
-                    }
-                } else {
-                    return null
+                if (!credentials?.email || !credentials.password) {
+                    throw new Error("Email and password are required.");
                 }
-            }
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                });
+
+                if (user === null) {
+                    throw new Error("User not found.");
+                }
+
+                const isValid = bcrypt.compare(credentials.password, user.password!);
+                if (!isValid) {
+                    throw new Error("Invalid password.");
+                }
+                else {
+                    return { id: user.id, email: user.email, name: user.name };
+                }
+
+            },
         }),
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || '',

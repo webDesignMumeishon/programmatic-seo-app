@@ -1,5 +1,5 @@
 'use server'
-
+import bcrypt from 'bcrypt'
 import { createSession, deleteSession } from '@/lib/session'
 import { redirect } from 'next/navigation'
 import prisma from '../../lib/prisma'
@@ -21,18 +21,27 @@ export async function logout() {
     deleteSession()
 }
 
-// export async function signUp(email: string, password: string, name: string) {
-//     try {
-//         const createdUser = await prisma.user.create({
-//             data: {
-//                 email,
-//                 password,
-//                 name
-//             }
-//         })
-//         return createdUser.email
-//     } catch (error) {
-//         return null
-//     }
+export async function signUp(email: string, password: string, name: string) {
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { email } });
 
-// }
+        if (existingUser) {
+            throw new Error('User already exists, please sign in')
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await prisma.user.create({
+            data: {
+                email,
+                name,
+                password: hashedPassword,
+            },
+        });
+
+        return newUser
+    } catch (error) {
+        throw new Error('Something went wrong, please try again.')
+    }
+
+}

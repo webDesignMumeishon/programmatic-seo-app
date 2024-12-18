@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from 'next/link'
+import { signUp } from '@/actions/auth'
 
 export default function AuthForm() {
     const [isLoading, setIsLoading] = useState(false)
@@ -103,7 +104,7 @@ export default function AuthForm() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="signup-password">Password</Label>
-                                <Input id="signup-password" name="password" type="password" required />
+                                <Input id="signup-password" name="password" type="password" placeholder="Enter your password" required />
                             </div>
                             <Button className="w-full" type="submit" disabled={isLoading}>
                                 {isLoading ? 'Signing up...' : 'Sign Up'}
