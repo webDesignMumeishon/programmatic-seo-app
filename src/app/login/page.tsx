@@ -12,7 +12,7 @@ export default async function LoginPage() {
     const { isAuth } = await verifySession()
 
     if (isAuth) {
-        redirect('/form')
+        return redirect('/form')
     }
 
     return (

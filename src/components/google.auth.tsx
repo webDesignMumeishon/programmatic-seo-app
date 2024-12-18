@@ -1,77 +1,61 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { AlertCircle, LogOut } from "lucide-react"
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Icons } from "@/components/ui/icons"
 
-type Props = {
-    hasToken: boolean
-}
+export default function PlatformSelectionPage() {
+    const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
+    const router = useRouter()
 
-export default function GoogleAuth({ hasToken }: Props) {
-
-    const handleSignIn = async () => {
-        try {
-            await signIn('google')
-        } catch (error) {
-            console.error('Failed to sign in:', error)
-            // Fallback for when NextAuth is not available
-            window.location.href = '/api/auth/signin'
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        if (selectedPlatform) {
+            // Here you would typically save the selected platform to the user's profile
+            console.log(`Selected platform: ${selectedPlatform}`)
+            router.push('/dashboard') // Redirect to dashboard or next step
         }
-    }
-
-    const handleSignOut = async () => {
-        try {
-            await signOut()
-        } catch (error) {
-            console.error('Failed to sign out:', error)
-            // Fallback for when NextAuth is not available
-            window.location.href = '/api/auth/signout'
-        }
-    }
-
-    if (!hasToken) {
-        return (
-            <div className='flex justify-center items-center h-screen'>
-                <Card className="w-[350px] h-max">
-                    <CardHeader>
-                        <CardTitle>Connect Google Account</CardTitle>
-                        <CardDescription>Access to Google Docs API requires authorization</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center space-x-2 text-yellow-600">
-                            <AlertCircle size={20} />
-                            <p className="text-sm">You need to connect your Google account to proceed.</p>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button onClick={handleSignIn} className="w-full">
-                            Connect Google Account
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </div>
-        )
     }
 
     return (
-        <div className='flex justify-center items-center h-screen'>
-            <Card className="w-[350px] ">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <Card className="w-[350px]">
                 <CardHeader>
-                    <CardTitle>Google Account Connected</CardTitle>
-                    <CardDescription>You now have access to the Google Docs API</CardDescription>
+                    <CardTitle>Select a Platform</CardTitle>
+                    <CardDescription>Choose a platform to connect to your account.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    {/* <p className="text-sm">Signed in as: {session.user?.email}</p> */}
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                    <Button onClick={handleSignOut} variant="outline">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign out
-                    </Button>
-                </CardFooter>
+                <form onSubmit={handleSubmit}>
+                    <CardContent>
+                        <RadioGroup value={selectedPlatform || ""} onValueChange={setSelectedPlatform} className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="google-docs" id="google-docs" />
+                                <Label htmlFor="google-docs" className="flex items-center space-x-2 cursor-pointer">
+                                    <Icons.google className="h-5 w-5" />
+                                    <span>Google Docs</span>
+                                </Label>
+                            </div>
+                            <div className="flex items-center space-x-2 opacity-50">
+                                <RadioGroupItem value="wordpress" id="wordpress" disabled />
+                                <Label htmlFor="wordpress" className="flex items-center space-x-2 cursor-not-allowed">
+                                    <Icons.wordpress className="h-5 w-5" />
+                                    <span>WordPress</span>
+                                    <span className="text-xs text-muted-foreground">(Coming Soon)</span>
+                                </Label>
+                            </div>
+                        </RadioGroup>
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" className="w-full" disabled={!selectedPlatform}>
+                            Connect Platform
+                        </Button>
+                    </CardFooter>
+                </form>
             </Card>
         </div>
     )
 }
+
