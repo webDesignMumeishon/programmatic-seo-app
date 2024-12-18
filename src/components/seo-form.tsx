@@ -82,8 +82,13 @@ export default function SEOForm() {
             return alert('Missing cities or services')
         }
         setIsLoading(true)
-        await createJobs(cities, services, website, company, phone)
-        setIsLoading(false)
+        try {
+            await createJobs(cities, services, website, company, phone)
+            setIsLoading(false)
+        } catch (error) {
+            alert('Something went wrong, please try again')
+            setIsLoading(false)
+        }
     }
 
     if (isLoading) {

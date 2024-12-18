@@ -6,7 +6,7 @@ export default async function Page() {
     const { hasToken } = await verifySession()
 
     if (!hasToken) {
-        return (<GoogleAuth />)
+        return (<GoogleAuth hasToken={hasToken} />)
     }
 
     redirect('/form')

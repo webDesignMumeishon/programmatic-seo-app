@@ -1,22 +1,21 @@
 import 'server-only'
-
-import { cookies } from 'next/headers'
-import { decrypt } from '@/lib/session'
 import { cache } from 'react'
+import { getServerSession, } from 'next-auth/next'
+import { authOptions } from './authOptions'
 
 export const verifySession = cache(async () => {
-    const cookie = cookies().get('session')?.value
-    const cookieGoogle = cookies().get('next-auth.session-token')?.value || cookies().get('__Secure-next-auth.session-token')?.value
+    const nextAuthSession: any = await getServerSession(authOptions)
 
-    const session = await decrypt(cookie)
-
-    if (!session?.userId) {
+    if (nextAuthSession === null) {
         return { isAuth: false, userId: null, hasToken: false }
     }
+    else {
+        const accessToken = nextAuthSession.accessToken !== undefined
 
-    if (cookieGoogle === undefined) {
-        return { isAuth: true, userId: session?.userId, hasToken: false }
+        if (accessToken) {
+            return { isAuth: true, userId: nextAuthSession.user.id, hasToken: true }
+        }
+        return { isAuth: true, userId: nextAuthSession.user.id, hasToken: false }
     }
 
-    return { isAuth: true, userId: session?.userId, hasToken: true }
 })

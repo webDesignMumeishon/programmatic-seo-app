@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Login } from '@/actions/auth'
 import Link from 'next/link'
 
 export default function AuthForm() {
@@ -16,39 +16,51 @@ export default function AuthForm() {
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
 
-    async function onLogin(event: React.FormEvent<HTMLFormElement>) {
+    async function onSubmit(event: React.FormEvent<HTMLFormElement>, mode: 'login' | 'signup') {
         event.preventDefault()
         setIsLoading(true)
         setError(null)
-        const target = event.target as typeof event.target & {
-            username: { value: string }
-            password: { value: string }
-        }
-        const username = target.username.value
-        const password = target.password.value
-        try {
-            const response = await Login(username, password)
-            if (response?.error) {
-                throw new Error(response.error)
+
+        const formData = new FormData(event.currentTarget)
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+        const name = formData.get('name') as string
+
+        if (mode === 'login') {
+            try {
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    email,
+                    password,
+                })
+
+                if (result?.error) {
+                    setError(result.error)
+                } else {
+                    router.push('/form')
+                }
+            } catch (error) {
+                setError('An unexpected error occurred')
             }
-            router.push('/form')
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'An unexpected error occurred')
-        } finally {
-            setIsLoading(false)
+        } else {
+            try {
+                const user = await signUp(email, password, name)
+                if (user !== null) {
+                    router.push('/login')
+                } else {
+                    setError('Failed to create user')
+                }
+            } catch (error) {
+                setError('An unexpected error occurred')
+            }
         }
+
+        setIsLoading(false)
     }
 
-    async function onSignUp(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
+    const handleGoogleSignIn = () => {
         setIsLoading(true)
-        setError(null)
-        // Implement sign-up logic here
-        // For now, we'll just simulate a delay and show a success message
-        setTimeout(() => {
-            setIsLoading(false)
-            alert('Sign up successful! Please log in.')
-        }, 1500)
+        signIn('google', { callbackUrl: '/form' })
     }
 
     return (
@@ -64,14 +76,15 @@ export default function AuthForm() {
                         <TabsTrigger value="signup">Sign Up</TabsTrigger>
                     </TabsList>
                     <TabsContent value="login">
-                        <form onSubmit={onLogin} className="space-y-4 mt-4">
+                        <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4 mt-4">
+
                             <div className="space-y-2">
-                                <Label htmlFor="login-username">Username</Label>
-                                <Input id="login-username" name="username" placeholder="Enter your username" type="text" required />
+                                <Label htmlFor="login-email">Email</Label>
+                                <Input id="login-email" name="email" placeholder="Enter your email" type="email" required />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="login-password">Password</Label>
-                                <Input id="login-password" name="password" type="password" required />
+                                <Input id="login-password" name="password" type="password" placeholder="Enter your password" required />
                             </div>
                             <Button className="w-full" type="submit" disabled={isLoading}>
                                 {isLoading ? 'Logging in...' : 'Login'}
@@ -79,10 +92,10 @@ export default function AuthForm() {
                         </form>
                     </TabsContent>
                     <TabsContent value="signup">
-                        <form onSubmit={onSignUp} className="space-y-4 mt-4">
+                        <form onSubmit={(e) => onSubmit(e, 'signup')} className="space-y-4 mt-4">
                             <div className="space-y-2">
-                                <Label htmlFor="signup-username">Username</Label>
-                                <Input id="signup-username" name="username" placeholder="Choose a username" type="text" required />
+                                <Label htmlFor="login-name">Name</Label>
+                                <Input id="login-name" placeholder="Enter your name" name="name" type="text" required />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="signup-email">Email</Label>
@@ -98,6 +111,27 @@ export default function AuthForm() {
                         </form>
                     </TabsContent>
                 </Tabs>
+                <div className="relative mt-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                            Or continue with
+                        </span>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 mt-4">
+                    <Button
+                        variant="outline"
+                        type="button"
+                        disabled={isLoading}
+                        onClick={handleGoogleSignIn}
+                        className="w-full"
+                    >
+                        {isLoading ? 'Processing...' : 'Sign in with Google'}
+                    </Button>
+                </div>
             </CardContent>
             {error && (
                 <Alert variant="destructive" className="mt-4">
@@ -112,3 +146,4 @@ export default function AuthForm() {
         </Card>
     )
 }
+

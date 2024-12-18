@@ -5,8 +5,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { AlertCircle, LogOut } from "lucide-react"
 import { useSession, signIn, signOut } from 'next-auth/react';
 
-export default function GoogleAuth() {
-    const { data: session } = useSession()
+type Props = {
+    hasToken: boolean
+}
+
+export default function GoogleAuth({ hasToken }: Props) {
 
     const handleSignIn = async () => {
         try {
@@ -28,7 +31,7 @@ export default function GoogleAuth() {
         }
     }
 
-    if (!session) {
+    if (!hasToken) {
         return (
             <div className='flex justify-center items-center h-screen'>
                 <Card className="w-[350px] h-max">
@@ -60,7 +63,7 @@ export default function GoogleAuth() {
                     <CardDescription>You now have access to the Google Docs API</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm">Signed in as: {session.user?.email}</p>
+                    {/* <p className="text-sm">Signed in as: {session.user?.email}</p> */}
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button onClick={handleSignOut} variant="outline">
