@@ -9,6 +9,9 @@ import { DefaultArgs } from '@prisma/client/runtime/library';
 
 export const authOptions: AuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
+    pages: {
+        signIn: '/login'
+    },
     session: {
         strategy: "jwt",
     },
